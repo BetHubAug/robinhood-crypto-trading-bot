@@ -1,9 +1,10 @@
+Here is the rewritten `README.md` for your repository:
 
+```markdown
+# Robinhood Crypto Trading Bot
 
-## **Using the GitHub Repository**
-
-### **Repository Overview**
-The repository supports:
+## Repository Overview
+This repository supports:
 - Automated trading for cryptocurrencies like BTC, ETH, DOGE, and SHIB.
 - Scalping and grid trading strategies.
 - Backtesting on historical data.
@@ -11,21 +12,20 @@ The repository supports:
 
 ---
 
-### **Step 1: Clone the Repository**
+## Getting Started
+
+### Step 1: Clone the Repository
 Clone the repository to your local machine:
 ```bash
 git clone https://github.com/BetHubAug/robinhood-crypto-trading-bot.git
 cd robinhood-crypto-trading-bot
 ```
 
----
-
-### **Step 2: Install Dependencies**
+### Step 2: Install Dependencies
 Install the required Python libraries:
 ```bash
 pip install -r requirements.txt
 ```
-
 Dependencies include:
 - `pandas`: For data manipulation.
 - `backtrader`: For backtesting strategies.
@@ -33,9 +33,7 @@ Dependencies include:
 - `requests`: For interacting with Robinhood's API.
 - `pyotp`: For handling multi-factor authentication.
 
----
-
-### **Step 3: Configure the Bot**
+### Step 3: Configure the Bot
 Edit the `config.json` file to match your account details and preferences:
 ```json
 {
@@ -61,18 +59,14 @@ Edit the `config.json` file to match your account details and preferences:
 }
 ```
 
----
-
-### **Step 4: Backtest the Strategy**
+### Step 4: Backtest the Strategy
 Run the backtesting script to test strategies on historical data:
 ```bash
 python backtest.py
 ```
 This will simulate trades using historical price data stored in `data/crypto_data.csv`.
 
----
-
-### **Step 5: Run the Live Trading Bot**
+### Step 5: Run the Live Trading Bot
 Once satisfied with backtesting results, start live trading:
 ```bash
 python crypto_bot.py
@@ -81,20 +75,25 @@ The bot will fetch live market data, calculate position sizes, and execute trade
 
 ---
 
-## **Optimizing for Your Portfolio ($211.19)**
+## Optimizing for Your Portfolio ($211.19)
 1. **Max Position Size**: Set `max_position_size_percent` to 10% (~$21 per trade).
 2. **Preserve Capital**: Set `preserve_capital_percent` to 50% (~$105 remains untouched).
 3. **Target Low-Cost Cryptos**: Focus on DOGE and SHIB for higher trade volumes with smaller amounts.
 
 ---
 
-## **Next Steps**
+## Next Steps
 1. Monitor the bot's performance in real-time.
 2. Adjust configurations based on results (e.g., profit targets or stop-loss levels).
 3. Explore additional features or strategies in the repository.
 
 This setup ensures you can safely test and deploy the bot while aligning with your portfolio size and goals!
 
+---
+
 Citations:
-[1] 1000001511.jpg https://pplx-res.cloudinary.com/image/upload/v1744010573/user_uploads/BnXaOILWtyThvKj/1000001511.jpg
-[2] robinhood-crypto-trading-bot https://github.com/BetHubAug/robinhood-crypto-trading-bot
+1. [1000001511.jpg](https://pplx-res.cloudinary.com/image/upload/v1744010573/user_uploads/BnXaOILWtyThvKj/1000001511.jpg)
+2. [robinhood-crypto-trading-bot](https://github.com/BetHubAug/robinhood-crypto-trading-bot)
+```
+
+Feel free to customize further as needed!
