@@ -1,0 +1,20 @@
+{
+    "credentials": {
+        "username": "<YOUR_ROBINHOOD_USERNAME>",
+        "password": "<YOUR_ROBINHOOD_PASSWORD>"
+    },
+    "trading_params": {
+        "strategy": "scalping",
+        "crypto_symbols": ["BTC", "ETH", "DOGE"],
+        "profit_target_percent": 0.75,
+        "stop_loss_percent": 0.5,
+        "max_position_size_percent": 10,
+        "max_daily_trades": 15,
+        "cooldown_period": 300
+    },
+    "risk_management": {
+        "max_daily_loss_percent": 3,
+        "preserve_capital_percent": 50,
+        "max_total_position_percent": 40
+    }
+}
