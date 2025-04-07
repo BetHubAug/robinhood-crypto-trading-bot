@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+Robinhood Crypto Trading Bot for Termux (2025 Edition)
+Interactive and User-Friendly Version
+"""
+
 import os
 import json
 import time
@@ -8,6 +14,7 @@ import numpy as np
 from typing import Dict, List
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 # Configure logging
 logging.basicConfig(
@@ -23,11 +30,15 @@ logger = logging.getLogger("crypto_bot")
 class RobinhoodCryptoBot:
     """Robinhood Cryptocurrency Trading Bot"""
 
-    def __init__(self):
-        self.config = {}
+    def __init__(self, config_path="config.json"):
+        self.config = self.load_config(config_path)
         self.token = None
         self.account_id = None
         self.model = RandomForestClassifier()
+
+    def load_config(self, path: str) -> Dict:
+        with open(path, "r") as file:
+            return json.load(file)
 
     def setup(self):
         """Interactive setup for user configuration"""
@@ -37,10 +48,8 @@ class RobinhoodCryptoBot:
         username = input("Username: ")
         password = input("Password: ")
 
-        self.config["credentials"] = {
-            "username": username,
-            "password": password
-        }
+        self.config["credentials"]["username"] = username
+        self.config["credentials"]["password"] = password
 
         print("\nSetup complete! Proceeding to authentication...\n")
 
@@ -120,18 +129,58 @@ class RobinhoodCryptoBot:
             logger.error(f"Error placing order: {str(e)}")
             return False
 
+    def fetch_historical_data(self, symbol: str, interval: str = "1d", limit: int = 100) -> pd.DataFrame:
+        """Fetch historical crypto data from Binance"""
+        logger.info(f"Fetching historical data for {symbol} with interval {interval}")
+        url = "https://api.binance.com/api/v3/klines"
+        params = {
+            "symbol": symbol,
+            "interval": interval,
+            "limit": limit
+        }
+
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            # Convert to DataFrame
+            df = pd.DataFrame(data, columns=[
+                "open_time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "ignore"
+            ])
+
+            # Convert timestamps to readable dates
+            df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+            df["close_time"] = pd.to_datetime(df["close_time"], unit="ms")
+
+            # Keep only relevant columns
+            df = df[["open_time", "open", "high", "low", "close", "volume"]]
+            return df
+        else:
+            logger.error(f"Failed to fetch historical data: {response.status_code}")
+            return pd.DataFrame()
+
     def analyze_data(self, data: pd.DataFrame):
         """Analyze data and train model"""
         logger.info("Analyzing data and training model...")
-        X = data.drop(['target'], axis=1)
+        if data.empty:
+            logger.error("No data to analyze")
+            return
+
+        data['target'] = (data['close'].shift(-1) > data['close']).astype(int)  # Example target
+        X = data.drop(['target', 'open_time'], axis=1)
         y = data['target']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         self.model.fit(X_train, y_train)
-        logger.info(f"Model training completed with accuracy: {self.model.score(X_test, y_test)}")
+        logger.info(f"Model training completed with accuracy: {accuracy_score(y_test, self.model.predict(X_test))}")
 
     def make_decision(self, quotes: Dict[str, Dict[str, float]]) -> str:
         """Make buy/sell decision based on AI model"""
         logger.info("Making buy/sell decision...")
+        if not quotes:
+            logger.error("No quotes available for decision making")
+            return "hold"
+
         features = np.array([quotes[symbol]['price'] for symbol in quotes]).reshape(1, -1)
         prediction = self.model.predict(features)
         return "buy" if prediction == 1 else "sell"
@@ -145,11 +194,12 @@ def main():
             print("\nMain Menu:")
             print("1. Fetch Crypto Quotes")
             print("2. Place Order")
-            print("3. Analyze Data")
-            print("4. Make Decision")
-            print("5. Exit")
+            print("3. Fetch Historical Data")
+            print("4. Analyze Data")
+            print("5. Make Decision")
+            print("6. Exit")
 
-            choice = input("Select an option (1/2/3/4/5): ")
+            choice = input("Select an option (1/2/3/4/5/6): ")
 
             if choice == '1':
                 symbols = input("Enter cryptocurrency symbols (comma-separated): ").split(',')
@@ -169,21 +219,33 @@ def main():
                     print("\nFailed to place order.")
 
             elif choice == '3':
-                # Example data for analysis
-                data = pd.DataFrame({
-                    'price': [100, 200, 300, 400, 500],
-                    'volume': [10, 25, 15, 20, 30],
-                    'target': [1, 0, 1, 0, 1]
-                })
-                bot.analyze_data(data)
+                symbol = input("Enter cryptocurrency symbol (e.g., BTCUSDT): ").strip().upper()
+                interval = input("Enter time interval (e.g., 1d, 1h): ").strip()
+                limit = int(input("Enter limit (number of data points to fetch): ").strip())
+
+                data = bot.fetch_historical_data(symbol, interval, limit)
+                if not data.empty:
+                    print(data.head())
+                    data.to_csv("data/crypto_data.csv", index=False)
+                    print("\nHistorical data fetched and saved to data/crypto_data.csv")
+                else:
+                    print("\nFailed to fetch historical data.")
 
             elif choice == '4':
+                file_path = input("Enter path to historical data CSV file: ").strip()
+                if os.path.exists(file_path):
+                    data = pd.read_csv(file_path)
+                    bot.analyze_data(data)
+                else:
+                    print("\nFile not found.")
+
+            elif choice == '5':
                 symbols = input("Enter cryptocurrency symbols (comma-separated): ").split(',')
                 quotes = bot.fetch_crypto_quotes([s.strip().upper() for s in symbols])
                 decision = bot.make_decision(quotes)
                 print(f"\nDecision: {decision}")
 
-            elif choice == '5':
+            elif choice == '6':
                 print("\nExiting... Goodbye!")
                 break
 
