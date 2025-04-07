@@ -1,8 +1,4 @@
-https://github.com/BetHubAug/robinhood-crypto-trading-bot
 
-It seems you're referencing a GitHub repository for a Robinhood Crypto Trading Bot and have provided an image of your Robinhood portfolio. Here's how you can use the bot and set it up to match your portfolio balance of $211.19.
-
----
 
 ## **Using the GitHub Repository**
 
