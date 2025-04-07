@@ -1,4 +1,3 @@
-Here is the rewritten `README.md` for your repository:
 
 ```markdown
 # Robinhood Crypto Trading Bot
