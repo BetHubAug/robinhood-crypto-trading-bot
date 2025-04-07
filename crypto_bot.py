@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Robinhood Crypto Trading Bot for Termux (2025 Edition)
-Designed for small accounts with optimized scalping strategies.
+Interactive and User-Friendly Version
 """
 
 import os
@@ -9,7 +9,6 @@ import json
 import time
 import logging
 import requests
-import datetime
 from typing import Dict, List
 
 # Configure logging
@@ -26,20 +25,25 @@ logger = logging.getLogger("crypto_bot")
 class RobinhoodCryptoBot:
     """Robinhood Cryptocurrency Trading Bot"""
 
-    def __init__(self, config_path: str = "config.json"):
-        self.config_path = config_path
-        self.config = self._load_config()
+    def __init__(self):
+        self.config = {}
         self.token = None
         self.account_id = None
 
-    def _load_config(self) -> Dict:
-        """Load configuration from file"""
-        if os.path.exists(self.config_path):
-            with open(self.config_path, 'r') as f:
-                return json.load(f)
-        else:
-            logger.error("Configuration file not found!")
-            exit(1)
+    def setup(self):
+        """Interactive setup for user configuration"""
+        print("\nWelcome to Robinhood Crypto Trading Bot!")
+        print("Please provide your Robinhood credentials.")
+        
+        username = input("Username: ")
+        password = input("Password: ")
+        
+        self.config["credentials"] = {
+            "username": username,
+            "password": password
+        }
+        
+        print("\nSetup complete! Proceeding to authentication...\n")
 
     def authenticate(self) -> bool:
         """Authenticate with Robinhood API"""
@@ -117,8 +121,42 @@ class RobinhoodCryptoBot:
             logger.error(f"Error placing order: {str(e)}")
             return False
 
-if __name__ == "__main__":
+def main():
     bot = RobinhoodCryptoBot()
+    bot.setup()
+    
     if bot.authenticate():
-        quotes = bot.fetch_crypto_quotes(["BTC", "ETH", "DOGE"])
-        print(quotes)
+        while True:
+            print("\nMain Menu:")
+            print("1. Fetch Crypto Quotes")
+            print("2. Place Order")
+            print("3. Exit")
+            
+            choice = input("Select an option (1/2/3): ")
+            
+            if choice == '1':
+                symbols = input("Enter cryptocurrency symbols (comma-separated): ").split(',')
+                quotes = bot.fetch_crypto_quotes([s.strip().upper() for s in symbols])
+                print("\nCurrent Quotes:")
+                for symbol, data in quotes.items():
+                    print(f"{symbol}: Price - ${data['price']}, Volume - {data['volume']}")
+            
+            elif choice == '2':
+                symbol = input("Enter cryptocurrency symbol: ").strip().upper()
+                quantity = float(input("Enter quantity to trade: "))
+                side = input("Enter 'buy' or 'sell': ").strip().lower()
+                
+                if bot.place_order(symbol, quantity, side):
+                    print("\nOrder placed successfully!")
+                else:
+                    print("\nFailed to place order.")
+            
+            elif choice == '3':
+                print("\nExiting... Goodbye!")
+                break
+            
+            else:
+                print("\nInvalid option. Please try again.")
+
+if __name__ == "__main__":
+    main()
